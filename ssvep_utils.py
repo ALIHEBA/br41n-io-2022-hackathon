@@ -1,3 +1,4 @@
+
 """
 Utilities for CNN based SSVEP Classification
 """
@@ -16,14 +17,12 @@ from keras import initializers, regularizers
 def butter_bandpass_filter(data, lowcut, highcut, sample_rate, order):
     '''
     Returns bandpass filtered data between the frequency ranges specified in the input.
-
     Args:
         data (numpy.ndarray): array of samples. 
         lowcut (float): lower cutoff frequency (Hz).
         highcut (float): lower cutoff frequency (Hz).
         sample_rate (float): sampling rate (Hz).
         order (int): order of the bandpass filter.
-
     Returns:
         (numpy.ndarray): bandpass filtered data.
     '''
@@ -38,23 +37,20 @@ def butter_bandpass_filter(data, lowcut, highcut, sample_rate, order):
 def get_filtered_eeg(eeg, lowcut, highcut, order, sample_rate):
     '''
     Returns bandpass filtered eeg for all channels and trials.
-
     Args:
         eeg (numpy.ndarray): raw eeg data of shape (num_classes, num_channels, num_samples, num_trials).
         lowcut (float): lower cutoff frequency (Hz).
         highcut (float): lower cutoff frequency (Hz).
         order (int): order of the bandpass filter.
         sample_rate (float): sampling rate (Hz).
-
     Returns:
         (numpy.ndarray): bandpass filtered eeg of shape (num_classes, num_channels, num_samples, num_trials).
     '''
     
     num_classes = eeg.shape[0]
-    num_trials = eeg.shape[1]
-    num_chan = eeg.shape[2]
-    total_trial_len = egg.shape[3]
-    
+    num_chan = eeg.shape[1]
+    total_trial_len = eeg.shape[2]
+    num_trials = eeg.shape[3]
     
     trial_len = int(38+0.135*sample_rate+4*sample_rate-1) - int(38+0.135*sample_rate)
     filtered_data = np.zeros((eeg.shape[0], eeg.shape[1], trial_len, eeg.shape[3]))
@@ -72,12 +68,10 @@ def get_filtered_eeg(eeg, lowcut, highcut, order, sample_rate):
 def buffer(data, duration, data_overlap):
     '''
     Returns segmented data based on the provided input window duration and overlap.
-
     Args:
         data (numpy.ndarray): array of samples. 
         duration (int): window length (number of samples).
         data_overlap (int): number of samples of overlap.
-
     Returns:
         (numpy.ndarray): segmented data of shape (number_of_segments, duration).
     '''
@@ -94,13 +88,11 @@ def buffer(data, duration, data_overlap):
 def get_segmented_epochs(data, window_len, shift_len, sample_rate):
     '''
     Returns epoched eeg data based on the window duration and step size.
-
     Args:
         data (numpy.ndarray): array of samples. 
         window_len (int): window length (seconds).
         shift_len (int): step size (seconds).
         sample_rate (float): sampling rate (Hz).
-
     Returns:
         (numpy.ndarray): epoched eeg data of shape. 
         (num_classes, num_channels, num_trials, number_of_segments, duration).
@@ -131,7 +123,6 @@ def magnitude_spectrum_features(segmented_data, FFT_PARAMS):
     '''
     Returns magnitude spectrum features. Fast Fourier Transform computed based on
     the FFT parameters provided as input.
-
     Args:
         segmented_data (numpy.ndarray): epoched eeg data of shape 
         (num_classes, num_channels, num_trials, number_of_segments, num_samples).
@@ -140,7 +131,6 @@ def magnitude_spectrum_features(segmented_data, FFT_PARAMS):
         FFT_PARAMS['start_frequency'] (float): start frequency component to pick from (Hz). 
         FFT_PARAMS['end_frequency'] (float): end frequency component to pick upto (Hz). 
         FFT_PARAMS['sampling_rate'] (float): sampling rate (Hz).
-
     Returns:
         (numpy.ndarray): magnitude spectrum features of the input EEG.
         (n_fc, num_channels, num_classes, num_trials, number_of_segments).
@@ -175,7 +165,6 @@ def complex_spectrum_features(segmented_data, FFT_PARAMS):
     Returns complex spectrum features. Fast Fourier Transform computed based on
     the FFT parameters provided as input. The real and imaginary parts of the input
     signal are concatenated into a single feature vector.
-
     Args:
         segmented_data (numpy.ndarray): epoched eeg data of shape 
         (num_classes, num_channels, num_trials, number_of_segments, num_samples).
@@ -184,7 +173,6 @@ def complex_spectrum_features(segmented_data, FFT_PARAMS):
         FFT_PARAMS['start_frequency'] (float): start frequency component to pick from (Hz). 
         FFT_PARAMS['end_frequency'] (float): end frequency component to pick upto (Hz). 
         FFT_PARAMS['sampling_rate'] (float): sampling rate (Hz).
-
     Returns:
         (numpy.ndarray): complex spectrum features of the input EEG.
         (2*n_fc, num_channels, num_classes, num_trials, number_of_segments)
@@ -220,7 +208,6 @@ def complex_spectrum_features(segmented_data, FFT_PARAMS):
 def CNN_model(input_shape, CNN_PARAMS):
     '''
     Returns the Concolutional Neural Network model for SSVEP classification.
-
     Args:
         input_shape (numpy.ndarray): shape of input training data 
         e.g. [num_training_examples, num_channels, n_fc] or [num_training_examples, num_channels, 2*n_fc].
@@ -235,7 +222,6 @@ def CNN_model(input_shape, CNN_PARAMS):
         CNN_PARAMS['kernel_f'] (int): 1D kernel to operate on conv_1 layer for the SSVEP CNN. 
         CNN_PARAMS['n_ch'] (int): number of eeg channels
         CNN_PARAMS['num_classes'] (int): number of SSVEP targets/classes
-
     Returns:
         (keras.Sequential): CNN model.
     '''
