@@ -38,7 +38,7 @@ def get_filtered_eeg(eeg, lowcut, highcut, order, sample_rate):
     '''
     Returns bandpass filtered eeg for all channels and trials.
     Args:
-        eeg (numpy.ndarray): raw eeg data of shape (num_classes, num_channels, num_samples, num_trials).
+        eeg (numpy.ndarray): raw eeg data of shape (num_classes, num_channels).
         lowcut (float): lower cutoff frequency (Hz).
         highcut (float): lower cutoff frequency (Hz).
         order (int): order of the bandpass filter.
@@ -49,20 +49,15 @@ def get_filtered_eeg(eeg, lowcut, highcut, order, sample_rate):
     
     num_classes = eeg.shape[0]
     num_chan = eeg.shape[1]
-    total_trial_len = eeg.shape[2]
-    num_trials = eeg.shape[3]
     
-    trial_len = int(38+0.135*sample_rate+4*sample_rate-1) - int(38+0.135*sample_rate)
-    filtered_data = np.zeros((eeg.shape[0], eeg.shape[1], trial_len, eeg.shape[3]))
+
+    filtered_data = np.zeros((eeg.shape[0], eeg.shape[1]))
 
     for target in range(0, num_classes):
         for channel in range(0, num_chan):
-            for trial in range(0, num_trials):
-                signal_to_filter = np.squeeze(eeg[target, channel, int(38+0.135*sample_rate):
-                                               int(38+0.135*sample_rate+4*sample_rate-1), 
-                                               trial])
-                filtered_data[target, channel, :, trial] = butter_bandpass_filter(signal_to_filter, lowcut, 
-                                                                                  highcut, sample_rate, order)
+                signal_to_filter = np.squeeze(eeg[target, channel]):
+                                               
+                filtered_data[target, channel] = butter_bandpass_filter(signal_to_filter, lowcut, highcut, sample_rate, order)
     return filtered_data
 
 def buffer(data, duration, data_overlap):
@@ -100,7 +95,7 @@ def get_segmented_epochs(data, window_len, shift_len, sample_rate):
     
     num_classes = data.shape[0]
     num_chan = data.shape[1]
-    num_trials = data.shape[3]
+
     
     duration = int(window_len*sample_rate)
     data_overlap = (window_len - shift_len)*sample_rate
