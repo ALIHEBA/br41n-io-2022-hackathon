@@ -1,4 +1,3 @@
-
 """
 Utilities for CNN based SSVEP Classification
 """
@@ -34,11 +33,11 @@ def butter_bandpass_filter(data, lowcut, highcut, sample_rate, order):
     y = filtfilt(b, a, data)
     return y
 
-def get_filtered_eeg(eeg, lowcut, highcut, order, sample_rate):
+def get_filtered_eeg(eeg1, eeg2, lowcut, highcut, order, sample_rate):
     '''
     Returns bandpass filtered eeg for all channels and trials.
     Args:
-        eeg (numpy.ndarray): raw eeg data of shape (num_classes, num_channels).
+        eeg (numpy.ndarray): raw eeg data of shape (num_classes, num_channels, num_samples, num_trials).
         lowcut (float): lower cutoff frequency (Hz).
         highcut (float): lower cutoff frequency (Hz).
         order (int): order of the bandpass filter.
@@ -47,17 +46,23 @@ def get_filtered_eeg(eeg, lowcut, highcut, order, sample_rate):
         (numpy.ndarray): bandpass filtered eeg of shape (num_classes, num_channels, num_samples, num_trials).
     '''
     
-    num_classes = eeg.shape[0]
-    num_chan = eeg.shape[1]
+    num_classes = eeg2.shape[0]
+    num_trials = eeg2.shape[1]
+    num_chan = eeg1.shape[0]
+    total_trial_len = eeg1.shape[1]
     
-
-    filtered_data = np.zeros((eeg.shape[0], eeg.shape[1]))
+    
+    trial_len = int(38+0.135*sample_rate+4*sample_rate-1) - int(38+0.135*sample_rate)
+    filtered_data = np.zeros((eeg2.shape[0], eeg2.shape[1], trial_len, eeg1.shape[1]))
 
     for target in range(0, num_classes):
         for channel in range(0, num_chan):
-                signal_to_filter = np.squeeze(eeg[target, channel]):
-                                               
-                filtered_data[target, channel] = butter_bandpass_filter(signal_to_filter, lowcut, highcut, sample_rate, order)
+            for trial in range(0, num_trials):
+                signal_to_filter = np.squeeze(eeg1[channel, int(38+0.135*sample_rate):
+                                               int(38+0.135*sample_rate+4*sample_rate-1)])
+                    
+                filtered_data[channel, :] = butter_bandpass_filter(signal_to_filter, lowcut, 
+                                                                                  highcut, sample_rate, order)
     return filtered_data
 
 def buffer(data, duration, data_overlap):
@@ -95,7 +100,7 @@ def get_segmented_epochs(data, window_len, shift_len, sample_rate):
     
     num_classes = data.shape[0]
     num_chan = data.shape[1]
-
+    num_trials = data.shape[3]
     
     duration = int(window_len*sample_rate)
     data_overlap = (window_len - shift_len)*sample_rate

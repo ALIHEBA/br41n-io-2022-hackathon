@@ -42,7 +42,7 @@ for subject in range(0, 4):
     dataset = mat73.loadmat(f'C:\data\s{subject+1}.mat')
     eeg = np.array(dataset['y'], dtype='float32')
     
-    class_trial_dataset = sio.loadmat(f'C:\data\classInfo_4_5.m')
+    class_trial_dataset = sio.loadmat(f'C:\data\classInfo_4_5.mat')
     class_trial = np.array(dataset[''], dtype='float32')
     
     CNN_PARAMS['num_classes'] = class_trial.shape[0]
@@ -51,7 +51,7 @@ for subject in range(0, 4):
     num_trials = class_trial.shape[1]
     sample_rate = 256
 
-    filtered_data = su.get_filtered_eeg(eeg, 6, 80, 4, sample_rate)
+    filtered_data = su.get_filtered_eeg(eeg, class_trial, 6, 80, 4, sample_rate)
     eeg = []
 
     window_len = 1 

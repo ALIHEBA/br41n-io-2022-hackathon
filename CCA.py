@@ -1,5 +1,6 @@
 import sys
 import os
+import mat73
 sys.path.insert(0, os.path.abspath('..'))
 import math
 
@@ -10,17 +11,16 @@ from sklearn.metrics import confusion_matrix
 
 from scripts import ssvep_utils as su
 
-data_path = os.path.abspath('../data')
+#data_path = os.path.abspath('../data')
 all_segment_data = dict()
-all_acc = list()
+#all_acc = list()
 window_len = 1
 shift_len = 1
 sample_rate = 256
 duration = int(window_len*sample_rate)
-flicker_freq = np.array([9.25, 11.25, 13.25, 9.75, 11.75, 13.75, 
-                       10.25, 12.25, 14.25, 10.75, 12.75, 14.75])
+flicker_freq = np.array([9, 10, 12, 15])
 
- def get_cca_reference_signals(data_len, target_freq, sampling_rate):
+def get_cca_reference_signals(data_len, target_freq, sampling_rate):
     reference_signals = []
     t = np.arange(0, (data_len/(sampling_rate)), step=1.0/(sampling_rate))
     reference_signals.append(np.sin(np.pi*2*target_freq*t))
@@ -60,16 +60,19 @@ def cca_classify(segmented_data, reference_templates):
 
     return labels, predicted_class
     
-for subject in np.arange(0, 10):
-    dataset = sio.loadmat(f'{data_path}/s{subject+1}.mat')
-    eeg = np.array(dataset['eeg'], dtype='float32')
+for subject in np.arange(0, 3):
+    eeg1_dataset = mat73.loadmat(f'C:\data/s{subject+1}.mat')
+    eeg1 = np.array(eeg1_dataset['y'], dtype='float32')
     
-    num_classes = eeg.shape[0]
-    n_ch = eeg.shape[1]
-    total_trial_len = eeg.shape[2]
-    num_trials = eeg.shape[3]
+    eeg2_dataset = sio.loadmat(f'C:\data\classInfo_4_5.mat')
+    eeg2 = np.array(eeg2_dataset['A'], dtype='float32')
     
-    filtered_data = su.get_filtered_eeg(eeg, 6, 80, 4, sample_rate)
+    num_classes = eeg2.shape[0]
+    num_trials = eeg2.shape[1]
+    num_chan = eeg1.shape[0]
+    total_trial_len = eeg1.shape[1] 
+    
+    filtered_data = su.get_filtered_eeg(eeg1, eeg2, 3, 40, 2, sample_rate)
     all_segment_data[f's{subject+1}'] = su.get_segmented_epochs(filtered_data, window_len, 
                                                            shift_len, sample_rate)
 reference_templates = []
@@ -77,5 +80,5 @@ for fr in range(0, len(flicker_freq)):
     reference_templates.append(get_cca_reference_signals(duration, flicker_freq[fr], sample_rate))
 reference_templates = np.array(reference_templates, dtype='float32')
 
-all_acc = np.array(all_acc)
-print(f'Overall Accuracy Across Subjects: {np.mean(all_acc)*100} %, std: {np.std(all_acc)*100} %')
+#all_acc = np.array(all_acc)
+#print(f'Overall Accuracy Across Subjects: {np.mean(all_acc)*100} %, std: {np.std(all_acc)*100} %')
