@@ -7,6 +7,7 @@ SSVEP Data Processing
 
 - Nizar Almesri
 - Tina Aslan 
+- Heba Ali
 - Mohamed Alam
 # Useful Links
 
